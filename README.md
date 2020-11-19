@@ -112,29 +112,55 @@
       * SimpleJpaRepository(org.springframework.data.jpa.repository.support)，JPA 所有接口的默认实现类；
       * QueryDslJpaRepository(org.springframework.data.jpa.repository.support)，QueryDsl(Domain Specified Language) 的实现类。
       
+   * CrudRepository 接口: 主要提供了增删改查方法
+      * count(): long 查询总数返回 long 类型；
+      * void delete(T entity) 根据 entity 进行删除；
+      * void deleteAll(Iterable<? extends T> entities) 批量删除；
+      * void deleteAll() 删除所有；
+      * void deleteById(ID id); 根据主键删除，其是先查询出来再进行删除；
+      * boolean existsById(ID id) 根据主键判断实体是否存在；
+      * Iterable<T> findAllById(Iterable ids); 根据主键列表查询实体列表；
+      * Iterable<T> findAll(); 查询实体的所有列表；
+      * Optional<T> findById(ID id); 根据主键查询实体，返回 JDK 1.8 的 Optional，这可以避免 null exception；
+      * <S extends T> S save(S entity); 保存实体方法，参数和返回结果可以是实体的子类；
+      * saveAll(Iterable<S> entities) : 批量保存，原理和 save方法相同，通过 for 循环调用 save 方法实现。
+   
+   * PagingAndSortingRepository 接口: 提供分页和排序方法
+      * Iterable<T> findAll(Sort sort); 根据排序参数，实现不同的排序规则获取所有的对象的集合
+      * Page<T> findAll(Pageable pageable); 根据分页和排序进行查询，并用 Page 对返回结果进行封装。Pageable 对象封装了 Page 和 Sort
+      
+   * JpaRepository 接口:  JpaRepository 是 spring data 对关系型数据库进行抽象封装,它继承 PagingAndSortingRepository 类，并且其
+   实现类也是 SimpleJpaRepository。JpaRepository 还继承和拥有了 QueryByExampleExecutor 的相关方法。
   
-#### SimpleJpaRepository
+   * SimpleJpaRepository 实现类
+       SimpleJpaRepository 作为 spring data jpa 针对关系型数据库的主要实现,主要存在如下属性:
+       * EntityManager: 作为entity管理器,和持久化上下文(persistence context)关联,主要功能如下:
+          * 管理当前持久化上下文中entity
+          * 控制entity的查询(无锁查询,乐观锁查询,悲观锁查询)
+          * 将entity数据持久化到数据库(flush)
+          * 设置数据持久化模式(FlushMode)
+          * entity锁定(lock)
+          * entity刷新(refresh数据库数据)
+          * 创建查询
+            * 查询语句查询(qlString)
+            * 标注查询(CriteriaQuery)
+            * 更新查询(CriteriaUpdate)
+            * 删除查询CriteriaDelete
+            * 命名查询(nameQuery)
+            * 存储过程查询(StoredProcedureQuery)
+            * 本地查询(NativeQuery)
+          * 绑定事务(joinTransaction)
+          * 元模型获取(getMetamodel)
+          * 实体图的管理(EntityGraphs)
+       * entityInformation: 存储实体的相关信息和 Crud 方法的元数据
 
-SimpleJpaRepository 作为 spring data jpa 针对关系型数据库的主要实现,主要存在如下属性:
-
-   * EntityManager: 作为entity管理器,和持久化上下文(persistence context)关联,主要功能如下:
-      * 管理当前持久化上下文中entity
-      * 控制entity的查询(无锁查询,乐观锁查询,悲观锁查询)
-      * 将entity数据持久化到数据库(flush)
-      * 设置数据持久化模式(FlushMode)
-      * entity锁定(lock)
-      * entity刷新(refresh数据库数据)
-      * 创建查询
-        * 查询语句查询(qlString)
-        * 标注查询(CriteriaQuery)
-        * 更新查询(CriteriaUpdate)
-        * 删除查询CriteriaDelete
-        * 命名查询(nameQuery)
-        * 存储过程查询(StoredProcedureQuery)
-        * 本地查询(NativeQuery)
-      * 绑定事务(joinTransaction)
-      * 元模型获取(getMetamodel)
-      * 实体图的管理(EntityGraphs)
-   * entityInformation: 存储实体的相关信息和 Crud 方法的元数据
+#### Defining Query Methods 的命名语法与参数
+   Spring Data JPA 的最大特色是利用方法名定义查询方法（Defining Query Methods）DQM 来做 CRUD 操作。
+   * DQM 两种语法如下:
+       * 一种是直接通过方法名实现；
+       * 另一种是 @Query 手动在方法上定义。
+   * 方法的查询策略设置
+   
+   
 
 
