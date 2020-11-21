@@ -11,7 +11,7 @@
       * 定义了一套基于对象的 SQL：Java Persistence Query Language（JPQL），像 Hibernate 一样，通过写面向对象（JPQL）而非面向数据
       库的查询语言（SQL）查询数据，避免了程序与数据库 SQL 语句耦合严重，比较适合跨数据源的场景。
       * ORM（Object/Relational Metadata）对象注解映射关系，JPA 直接通过注解的方式来表示 Java 的实体对象及元数据对象和数据表之间的
-      映射关系，框架将实体对象与 Session 进行关联，通过操作 Session 中不通实体的状态，从而实现数据库的操作，并实现持久化到数据库表中
+      映射关系，框架将实体对象与 Session 进行关联，通过操作 Session 中不同实体的状态，从而实现数据库的操作，并实现持久化到数据库表中
       的操作，与 DB 实现同步。
       
    * JPA 的开源实现
@@ -122,8 +122,8 @@
       * Iterable<T> findAllById(Iterable ids); 根据主键列表查询实体列表；
       * Iterable<T> findAll(); 查询实体的所有列表；
       * Optional<T> findById(ID id); 根据主键查询实体，返回 JDK 1.8 的 Optional，这可以避免 null exception；
-      * <S extends T> S save(S entity); 保存实体方法，参数和返回结果可以是实体的子类；
-      * saveAll(Iterable<S> entities) : 批量保存，原理和 save方法相同，通过 for 循环调用 save 方法实现。
+      * \<S extends T> S save(S entity); 保存实体方法，参数和返回结果可以是实体的子类；
+      * saveAll(Iterable\<S> entities) : 批量保存，原理和 save方法相同，通过 for 循环调用 save 方法实现。
    
    * PagingAndSortingRepository 接口: 提供分页和排序方法
       * Iterable<T> findAll(Sort sort); 根据排序参数，实现不同的排序规则获取所有的对象的集合
@@ -159,8 +159,29 @@
    * DQM 两种语法如下:
        * 一种是直接通过方法名实现；
        * 另一种是 @Query 手动在方法上定义。
+   * 定义查询方法的配置
+       * MyRepository Extends Repository 接口可以实现 Defining Query Methods 的功能；
+       * 继承其他 Repository 的子接口，或者自定义子接口，选择性地暴露 SimpleJpaRepository 里面已经实现的基础公用方法。
    * 方法的查询策略设置
-   
+       DQM 可以通过方法名和 @Query 注解两种方法实现,如果两种方式都采用, jpa 的选择策略配置如下:
+       ``@EnableJpaRepositories(queryLookupStrategy= QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND);``
+       其中，QueryLookupStrategy.Key 的值共 3 个，具体如下：
+       * Create: 直接根据方法名进行创建, 规则是根据方法名称的结构进行尝试, 一般的方法是从方法名中删除给定的一组已知前缀, 并解析该方法
+       的其余部分. 如果方法名不符合规则, 启动的时候会报异常, 这种情况可以理解为, 即使配置了 @Query 也是没有用的.
+       * USE_DECLARED_QUERY: 声明方式创建, 启动的时候会尝试找到一个声明的查询, 如果没有找到将抛出一个异常, 可以理解为必须配置 @Query.
+       * CREATE_IF_NOT_FOUND: 默认配置, 除非有特殊需求, 可以理解为以上两种方式的兼容版. 先用声明方式(@Query) 进行查找, 如果没有找到
+       与方法相匹配的查询, 则用 Create 的方法名创建规则创建一个查询; 两者都不满足的情况下抛出异常. 
+       以 Spring Boot 项目为例, 更改配置方法如下:
+       ```java
+         @EnableJpaRepositories(queryLookupStrategy= QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND)
+         public class Example1Application {
+            public static void main(String[] args) {
+               SpringApplication.run(Example1Application.class, args);  
+            }    
+         }
+       ```
+   * Defining Query Method（DQM）语法
+       带查询功能的方法名由查询策略（关键字）+ 查询字段 + 一些限制性条件组成，具有语义清晰、功能完整的特性
    
 
 
