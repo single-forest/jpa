@@ -1,6 +1,7 @@
 package com.example.jpa.controller;
 
 import com.example.jpa.model.User;
+import com.example.jpa.repository.MyUserRepository;
 import com.example.jpa.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private MyUserRepository myUserRepository;
+
     /**
      * 保存用户
      * @param user
@@ -25,9 +29,20 @@ public class UserController {
         return userRepository.save(user);
     }
 
+    /**
+     * 分页查询用户列表
+     * @param request
+     * @return
+     */
     @GetMapping(path = "/users")
     @ResponseBody
     public Page<User> getAllUsers(Pageable request){
         return userRepository.findAll(request);
+    }
+
+    @GetMapping(path = "/my/users")
+    @ResponseBody
+    public User getMyUsers(@RequestParam("id")Long id){
+        return myUserRepository.findById(id).orElse(null);
     }
 }

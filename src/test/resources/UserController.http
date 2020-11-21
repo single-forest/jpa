@@ -9,3 +9,6 @@ Cache-Control: no-cache
 GET http://127.0.0.1:8080/api/v1/users?size=6&page=0
 
 ###
+GET http://127.0.0.1:8080/api/v1/my/users?id=10
+
+###
